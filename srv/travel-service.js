@@ -64,6 +64,14 @@ class TravelService extends cds.ApplicationService {
       }
     })
 
+    /**
+     * Update the Booking's TotalSupplPrice
+     */
+    this._update_totals_supplement = async function (booking) {
+      const { totals } = await SELECT.one`coalesce (sum (Price),0) as totals`.from(BookingSupplement.drafts).where
+        `to_Booking_BookingUUID = ${booking}`
+      return UPDATE(Booking.drafts, booking).with({ TotalSupplPrice: totals })
+    }
 
     /**
      * Update the Travel's TotalPrice when a Booking's FlightPrice is modified.
@@ -80,6 +88,9 @@ class TravelService extends cds.ApplicationService {
     /**
      * Update the Travel's TotalPrice when a Supplement's Price is modified.
      */
+    /**
+   * Update the Travel's TotalPrice when a Supplement's Price is modified.
+   */
     this.after('UPDATE', 'BookingSupplement.drafts', async (_, req) => {
       if ('Price' in req.data) {
         // We need to fetch the Travel's UUID for the given Supplement target
@@ -87,6 +98,7 @@ class TravelService extends cds.ApplicationService {
           .from(BookingSupplement.drafts).where({ BookSupplUUID: req.data.BookSupplUUID })
         const { travel } = await SELECT.one`to_Travel_TravelUUID as travel`.from(Booking.drafts)
           .where`BookingUUID = ${booking} `
+        await this._update_totals_supplement(booking)
         return this._update_totals4(travel)
       }
     })
@@ -130,7 +142,7 @@ class TravelService extends cds.ApplicationService {
     this._update_totals4 = function (travel) {
       return UPDATE(Travel.drafts, travel).alias('T').with({
         TotalPrice: CXL`coalesce (T.BookingFee, 0) + ${SELECT`coalesce (sum (B.FlightPrice + ${SELECT`coalesce (sum (BS.Price),0)`.from(BookingSupplement.drafts).alias('BS').where`BS.to_Booking_BookingUUID = B.BookingUUID`
-            }),0)`.from(Booking.drafts).alias('B').where`B.to_Travel_TravelUUID = T.TravelUUID`
+          }),0)`.from(Booking.drafts).alias('B').where`B.to_Travel_TravelUUID = T.TravelUUID`
           }`
       })
     }
@@ -196,17 +208,17 @@ class TravelService extends cds.ApplicationService {
       req.data.Progress = score
     })
 
-    this.on ('acceptTravel', async req => {
-      await UPDATE (req.subject) .with ({TravelStatus_code:'A'})
+    this.on('acceptTravel', async req => {
+      await UPDATE(req.subject).with({ TravelStatus_code: 'A' })
       return this._update_progress(req.subject, 100)
     })
-    this.on ('rejectTravel', async req => {
-      await UPDATE (req.subject) .with ({TravelStatus_code:'X'})
+    this.on('rejectTravel', async req => {
+      await UPDATE(req.subject).with({ TravelStatus_code: 'X' })
       return this._update_progress(req.subject, 0)
     })
-  
-    this._update_progress = async function (travel, progress){
-      return await UPDATE (travel) . with({Progress : progress})
+
+    this._update_progress = async function (travel, progress) {
+      return await UPDATE(travel).with({ Progress: progress })
     }
 
     // Add base class's handlers. Handlers registered above go first.
