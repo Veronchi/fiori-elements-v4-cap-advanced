@@ -172,7 +172,9 @@
                                 ]
                             }
                         }
-                    }
+                    },
+                    "controlAggregation": "beginColumnPages",
+                    "contextPattern": ""
                 },
                 "TravelObjectPage": {
                     "type": "Component",
@@ -205,7 +207,9 @@
                             },
                             "editableHeaderContent": false
                         }
-                    }
+                    },
+                    "controlAggregation": "midColumnPages",
+                    "contextPattern": "/Travel({key})"
                 },
                 "BookingObjectPage": {
                     "type": "Component",
@@ -216,10 +220,18 @@
                             "entitySet": "Booking",
                             "editableHeaderContent": false
                         }
-                    }
+                    },
+                    "controlAggregation": "endColumnPages",
+                    "contextPattern": "/Travel({key})/to_Booking({key2})"
                 }
             },
-            "config": {}
+            "config": {
+                "flexibleColumnLayout": {
+                    "defaultTwoColumnLayoutType": "TwoColumnsMidExpanded",
+                    "defaultThreeColumnLayoutType": "ThreeColumnsEndExpanded"
+                },
+                "routerClass": "sap.f.routing.Router"
+            }
         },
         "contentDensities": {
             "compact": true,
@@ -229,6 +241,12 @@
             "extensions": {
                 "sap.ui.controllerExtensions": {}
             }
+        },
+        "rootView": {
+            "viewName": "sap.fe.templates.RootContainer.view.Fcl",
+            "type": "XML",
+            "async": true,
+            "id": "appRootView"
         }
     },
     "sap.platform.abap": {
