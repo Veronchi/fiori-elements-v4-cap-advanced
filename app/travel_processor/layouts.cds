@@ -8,66 +8,9 @@ using from '../../db/master-data';
 //
 
 annotate TravelService.Travel with @(
-    UI                    : {
-        SelectionVariant #canceled: {
-            $Type           : 'UI.SelectionVariantType',
-            ID              : 'canceled',
-            Text            : 'canceled',
-            Parameters      : [
+    UI                                         : {
 
-            ],
-            FilterExpression: '',
-            SelectOptions   : [{
-                $Type       : 'UI.SelectOptionType',
-                PropertyName: TravelStatus_code,
-                Ranges      : [{
-                    $Type : 'UI.SelectionRangeType',
-                    Sign  : #I,
-                    Option: #EQ,
-                    Low   : 'X',
-                }, ],
-            }, ],
-
-        },
-        SelectionVariant #open    : {
-            $Type           : 'UI.SelectionVariantType',
-            ID              : 'open',
-            Text            : 'open',
-            Parameters      : [
-
-            ],
-            FilterExpression: '',
-            SelectOptions   : [{
-                $Type       : 'UI.SelectOptionType',
-                PropertyName: TravelStatus_code,
-                Ranges      : [{
-                    $Type : 'UI.SelectionRangeType',
-                    Sign  : #I,
-                    Option: #EQ,
-                    Low   : 'O',
-                }, ],
-            }, ],
-        },
-        SelectionVariant #accepted: {
-            $Type           : 'UI.SelectionVariantType',
-            ID              : 'accepted',
-            Text            : 'accepted',
-            Parameters      : [
-
-            ],
-            FilterExpression: '',
-            SelectOptions   : [{
-                $Type       : 'UI.SelectOptionType',
-                PropertyName: TravelStatus_code,
-                Ranges      : [{
-                    $Type : 'UI.SelectionRangeType',
-                    Sign  : #I,
-                    Option: #EQ,
-                    Low   : 'A',
-                }, ],
-            }, ],
-        },
-        Identification            : [
+        Identification        : [
             {
                 $Type : 'UI.DataFieldForAction',
                 Action: 'TravelService.acceptTravel',
@@ -79,7 +22,7 @@ annotate TravelService.Travel with @(
                 Label : '{i18n>RejectTravel}'
             }
         ],
-        HeaderInfo                : {
+        HeaderInfo            : {
             TypeName      : '{i18n>Travel}',
             TypeNamePlural: '{i18n>Travels}',
             Title         : {
@@ -91,7 +34,7 @@ annotate TravelService.Travel with @(
                 Value: TravelID
             }
         },
-        PresentationVariant       : {
+        PresentationVariant   : {
             Text          : 'Default',
             Visualizations: ['@UI.LineItem'],
             SortOrder     : [{
@@ -100,14 +43,14 @@ annotate TravelService.Travel with @(
                 Descending: true
             }]
         },
-        SelectionFields           : [
+        SelectionFields       : [
             to_Agency_AgencyID,
             to_Customer_CustomerID,
             TravelStatus_code,
             BeginDate,
             EndDate,
         ],
-        LineItem                  : [
+        LineItem              : [
             {
                 $Type : 'UI.DataFieldForAction',
                 Action: 'TravelService.acceptTravel',
@@ -152,7 +95,7 @@ annotate TravelService.Travel with @(
                 Label : '{i18n>AgencyID}',
             },
         ],
-        Facets                    : [
+        Facets                : [
             {
                 $Type : 'UI.CollectionFacet',
                 Label : '{i18n>GeneralInformation}',
@@ -170,13 +113,13 @@ annotate TravelService.Travel with @(
                 Label : '{i18n>Bookings}'
             }
         ],
-        FieldGroup #TravelData    : {Data: [
+        FieldGroup #TravelData: {Data: [
             {Value: TravelID},
             {Value: to_Agency_AgencyID},
             {Value: to_Customer_CustomerID},
             {Value: Description}
         ]},
-        FieldGroup #DateData      : {Data: [
+        FieldGroup #DateData  : {Data: [
             {
                 $Type: 'UI.DataField',
                 Value: BeginDate
@@ -187,10 +130,117 @@ annotate TravelService.Travel with @(
             }
         ]}
     },
-    UI.DataPoint #Progress: {
+    UI.DataPoint #Progress                     : {
         Value        : Progress,
         Visualization: #Progress,
         TargetValue  : 100,
+    },
+    UI.SelectionPresentationVariant #tableView : {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        PresentationVariant: ![@UI.PresentationVariant],
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [{
+                $Type       : 'UI.SelectOptionType',
+                PropertyName: TravelStatus_code,
+                Ranges      : [{
+                    $Type : 'UI.SelectionRangeType',
+                    Sign  : #I,
+                    Option: #EQ,
+                    Low   : 'O',
+                }, ],
+            }],
+        },
+        Text               : '{i18n>Open}',
+    },
+    UI.LineItem #tableView                     : [
+        {
+            $Type : 'UI.DataFieldForAction',
+            Action : 'TravelService.rejectTravel',
+            Label : 'rejectTravel',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : Description,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : LastChangedAt,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : TravelID,
+            Label : 'TravelID',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : to_Booking.to_Customer_CustomerID,
+        },
+    ],
+    UI.SelectionPresentationVariant #tableView1: {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        PresentationVariant: {
+            $Type         : 'UI.PresentationVariantType',
+            Visualizations: ['@UI.LineItem#tableView', ],
+        },
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [{
+                $Type       : 'UI.SelectOptionType',
+                PropertyName: TravelStatus_code,
+                Ranges      : [{
+                    $Type : 'UI.SelectionRangeType',
+                    Sign  : #I,
+                    Option: #EQ,
+                    Low   : 'A',
+                }, ],
+            }],
+        },
+        Text               : '{i18n>Accepted}',
+    },
+    UI.LineItem #tableView1                    : [
+        {
+            $Type : 'UI.DataField',
+            Value : LastChangedAt,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : Description,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : TravelID,
+            Label : 'TravelID',
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : to_Agency_AgencyID,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : to_Customer_CustomerID,
+        },
+    ],
+    UI.SelectionPresentationVariant #tableView2: {
+        $Type              : 'UI.SelectionPresentationVariantType',
+        PresentationVariant: {
+            $Type         : 'UI.PresentationVariantType',
+            Visualizations: ['@UI.LineItem#tableView1', ],
+        },
+        SelectionVariant   : {
+            $Type        : 'UI.SelectionVariantType',
+            SelectOptions: [{
+                $Type       : 'UI.SelectOptionType',
+                PropertyName: TravelStatus_code,
+                Ranges      : [{
+                    $Type : 'UI.SelectionRangeType',
+                    Sign  : #I,
+                    Option: #EQ,
+                    Low   : 'X',
+                }, ],
+            }],
+        },
+        Text               : '{i18n>Canceled}',
     },
 );
 
