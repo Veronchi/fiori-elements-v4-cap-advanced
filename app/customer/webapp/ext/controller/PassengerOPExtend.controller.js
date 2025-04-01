@@ -1,6 +1,6 @@
 
-sap.ui.define(['sap/ui/core/mvc/ControllerExtension', "sap/ui/core/message/Message", "sap/ui/core/MessageType",
-], function (ControllerExtension, Message, MessageType) {
+sap.ui.define(['sap/ui/core/mvc/ControllerExtension', "sap/ui/core/message/Message", "sap/ui/core/MessageType", "sap/ui/model/json/JSONModel"
+], function (ControllerExtension, Message, MessageType, JSONModel) {
 	'use strict';
 
 
@@ -32,15 +32,26 @@ sap.ui.define(['sap/ui/core/mvc/ControllerExtension', "sap/ui/core/message/Messa
 							type: MessageType.Info,
 							message: await oExtensionAPI.getModel("i18n").getResourceBundle().getText("bookingsAttention")
 						});
+					const oPassengerBookingsModel = new JSONModel({
+						totalBookingsCount: 0,
+						newBookingsCount: 0,
+						acceptedBookingsCount: 0,
+						cancelledBookingsCount: 0
+					});
+					this.base.getView().setModel(oPassengerBookingsModel, "passengerBookingsModel");
 					// Request OData function with current CustomerID
 					const oCustomer = await oBindingContext.requestObject(oBindingContext.getPath());
 					oFunction.setParameter("CustomerID", oCustomer.CustomerID);
 					await oFunction.execute();
 					const oContext = oFunction.getBoundContext();
+					oPassengerBookingsModel.setProperty("/totalBookingsCount", oContext.getProperty("TotalBookingsCount"));
+					oPassengerBookingsModel.setProperty("/newBookingsCount", oContext.getProperty("NewBookingsCount"));
+					oPassengerBookingsModel.setProperty("/acceptedBookingsCount", oContext.getProperty("AcceptedBookingsCount"));
+					oPassengerBookingsModel.setProperty("/cancelledBookingsCount", oContext.getProperty("CancelledBookingsCount"));
 					if (this.message !== undefined) {
 						oBookingTableAPI.removeMessage(this.message);
 					}
-					if (oContext.getProperty("HasNewBookings")) {
+					if (oContext.getProperty("NewBookingsCount") > 0) {
 						this.message = oBookingTableAPI.addMessage(oWarningMessage);
 						oExtensionAPI.showMessages([oInfoMessage]);
 					}
