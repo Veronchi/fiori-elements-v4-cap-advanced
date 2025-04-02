@@ -331,6 +331,24 @@ annotate TravelService.Travel with @(
             },
         ],
     },
+    Analytics.AggregatedProperty #TravelID_countdistinct : {
+        $Type : 'Analytics.AggregatedPropertyType',
+        Name : 'TravelID_countdistinct',
+        AggregatableProperty : TravelID,
+        AggregationMethod : 'countdistinct',
+        ![@Common.Label] : '{i18n>Travels}',
+    },
+    UI.Chart #alpChart : {
+        $Type : 'UI.ChartDefinitionType',
+        ChartType : #Column,
+        Dimensions : [
+            PassengerCountry,
+        ],
+        DynamicMeasures : [
+            '@Analytics.AggregatedProperty#TravelID_countdistinct',
+        ],
+        Title : '{i18n>TravelsByCustomerCountry}',
+    },
 );
 
 annotate TravelService.Booking with @(
@@ -597,3 +615,7 @@ annotate TravelService.Booking with {
         Common.ValueListWithFixedValues: true
     )
 };
+annotate TravelService.Travel with {
+    PassengerCountry @Common.Label : '{i18n>CustomerCountry}'
+};
+
